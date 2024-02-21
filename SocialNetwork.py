@@ -58,3 +58,10 @@ class SocialNetwork:
 
     def __is_valid_password(self, password: str):
         return 4 <= len(password) <= 8
+
+    def __str__(self):
+        str = f"{self.__name} social network:"
+        for user in self.__users:
+            str += f"\n{user}"
+        return str
+

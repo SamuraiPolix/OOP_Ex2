@@ -7,6 +7,6 @@ class Receiver(ABC):
     def __init__(self):
         self._notifications = []
 
-    @abstractmethod
     def update(self, content: str):
-        pass
+        self._notifications.append(content)
+
