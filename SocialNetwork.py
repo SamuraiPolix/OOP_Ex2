@@ -63,5 +63,6 @@ class SocialNetwork:
         str = f"{self.__name} social network:"
         for user in self.__users:
             str += f"\n{user}"
+        str += "\n"
         return str
 
