@@ -17,10 +17,13 @@ class SocialNetwork:
         return cls.__instance
     
     def __init__(self, network_name: str):
-        self.__name = network_name
-        self.__users = []
-        print(f"The social network {network_name} was created!")
-        # self.__users_manager = UsersManager.UsersManager()
+        # Makes sure the name changes only on the first created instance
+        if not hasattr(self, '_SocialNetwork__name') or not self.__name:
+            self.__name = network_name
+            self.__users = []
+            print(f"The social network {network_name} was created!")
+        else:
+            print(f"Social network {self.__name} already exists!")
 
     # Register a user to the network
     def sign_up(self, username: str, password: str):

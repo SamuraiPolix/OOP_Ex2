@@ -3,6 +3,11 @@ from SocialNetwork import SocialNetwork
 def main():
     # Creating the network
     network = SocialNetwork("Twitter")
+    network2 = SocialNetwork("Facebook")
+
+    # Make sure only one instance of SocialNetwork is created:
+    print(network is network2)
+    print(network.__hash__(), network2.__hash__())
     print()
 
     # Creating users
