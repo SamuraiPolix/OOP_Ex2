@@ -34,9 +34,9 @@ class PostFactory(ABC):
                 post = SalePost(self.__user, *args)
             else:
                 # raise Exception(f"ERROR: Couldn't create a post for {self.__user.get_username()}: \"Post type\" doesn't exist")
-                print(f"ERROR: Couldn't create a post for {self.__user.get_username()}: \"Post type\" doesn't exist")
+                print(f"Error: Couldn't create a post for {self.__user.get_username()}: \"Post type\" doesn't exist!")
         else:
             # raise Exception(f"ERROR: Couldn't create a post for {self.__user.get_username()}: {self.__user.get_username()} is offline!")
-            print(f"ERROR: Couldn't create a post for {self.__user.get_username()}: {self.__user.get_username()} is offline!")
+            print(f"Error: Couldn't create a post for {self.__user.get_username()}: {self.__user.get_username()} is offline!")
 
         return post

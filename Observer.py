@@ -11,9 +11,15 @@ class Sender(ABC):
         self._followers = []
 
     def add_follower(self, follower):
-        self._followers.append(follower)
+        if not self._followers.__contains__(follower):
+            self._followers.append(follower)
+            return True
+        else:
+            return False
 
     def remove_follower(self, follower):
+        # trying to remove the follower
+        # if he is already not following - throws exception that is caught by the calling function
         self._followers.remove(follower)
 
     def notify_all(self, content: str):

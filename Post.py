@@ -11,7 +11,9 @@ class Post(ABC):
         self._owner = owner
 
     def like(self, user):
+        # If user is not connected - print error and quit
         if user.is_connected():
+            # if user is connected, and already liked - print error and quit. else - add like and update
             if not self._likes.__contains__(user):
                 self._likes.append(user)
                 # Notify only if someone other than the owner likes the post
@@ -25,6 +27,7 @@ class Post(ABC):
             print(f"Error: {user.get_username()} couldn't like {self._owner.get_username()}'s post: {user.get_username()} is offline!")
 
     def comment(self, user, text):
+        # comment only if user is online
         if user.is_connected():
             comment = Comment(user, text)
             self._comments.append(comment)
@@ -38,13 +41,14 @@ class Post(ABC):
 
     def display(self):
         # Default for all post types that doesn't have a display() function.
-        # ImagePost overrides this.
+        # ImagePost overrides this function.
         print(f"Error: display() function is not available for a {self.__class__.__name__}!")
 
     def __str__(self):
         return self._owner.get_username()
 
 
+# Small class used to store comments
 class Comment:
     def __init__(self, user, comment: str):
         self._user = user
@@ -102,7 +106,7 @@ class SalePost(Post):
     def __init__(self, owner, description: str, price: float, address: str):
         super().__init__(owner)
         if price < 0:
-            print("Warning: Price on sales post is invalid. (Post created anyways)\n")
+            print("Warning: Price on sales post is invalid! Created post anyways.\n")
         self._description = description
         self._price = price
         self._address = address
@@ -110,18 +114,21 @@ class SalePost(Post):
         self._status = "For sale!"
 
     def sold(self, password: str):
+        # check if password is correct
         if self._owner.is_correct_password(password):
             self._available = False
             self._status = "Sold!"
             print(f"{self._owner.get_username()}'s product is sold")
         else:
             # raise Exception(f"Error setting Sale Post as sold: Wrong password")
-            print("Error setting Sale Post as sold: Wrong password")
+            print("Error setting Sale Post as sold: Wrong password!")
 
     def discount(self, discount_percent: float, password: str):
+        # check if password is correct
         if self._owner.is_correct_password(password):
+            # Checks if discount percent is valid, print error if not
             if discount_percent < 0 or discount_percent > 100:
-                print("Error: Discount percent in invalid. (Discount not logged)\n")
+                print("Error: Discount percent in invalid! Discount not logged.\n")
             else:
                 self._price *= (100-discount_percent)/100
                 print(f"Discount on {self._owner.get_username()} product! the new price is: {self._price}")

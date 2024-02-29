@@ -3,6 +3,7 @@ from PostFactory import PostFactory
 
 
 # Implementing the Observer design pattern
+# A User can be both a Sender and a Receiver (can follow and be followed)
 class User (Sender, Receiver):
     __username: str
     __password: str
@@ -39,36 +40,49 @@ class User (Sender, Receiver):
         self.__is_connected = False
 
     def follow(self, user):
+        # needs to be online to perform actions
         if self.__is_connected:
-            user.add_follower(self)
-            print(f"{self.__username} started following {user.__username}")
+            if self.__username != user.get_username():
+                was_follow_successful = user.add_follower(self)
+                if was_follow_successful:
+                    print(f"{self.__username} started following {user.__username}")
+                else:   # 'Sender' couldn't add follower because he is already followed
+                    print(f"Error: {user.get_username()} already follows {self.__username}")
+            else:   # can't follow yourself
+                print(f"Error: {self.__username} couldn't follow {user.get_username()}: You cannot follow yourself!")
         else:
             # raise Exception(f"{self.__username} is offline!")
             print(f"Error: {self.__username} couldn't follow {user.get_username()}: {self.__username} is offline!")
 
     def unfollow(self, user):
+        # needs to be online to perform actions
         if self.__is_connected:
-            try:
-                user.remove_follower(self)
-                print(f"{self.__username} unfollowed {user.__username}")
-            except ValueError as ve:
-                print(f"Error: {self.__username} couldn't unfollow {user.get_username()}: Already not following!")
+            if self.__username != user.get_username():
+                try:
+                    user.remove_follower(self)
+                    print(f"{self.__username} unfollowed {user.__username}")
+                except ValueError as ve:        # Error removing from list - no such follower registered
+                    print(f"Error: {self.__username} couldn't unfollow {user.get_username()}: Already not following!")
+            else:       # can't unfollow yourself
+                print(f"Error: {self.__username} couldn't unfollow {user.get_username()}: You cannot unfollow yourself!")
         else:
             # raise Exception(f"{self.__username} is offline!")
             print(f"Error: {self.__username} couldn't unfollow {user.get_username()}: {self.__username} is offline!")
 
+    # returns null if post creation fails
     def publish_post(self, post_type: str, *args):
+        # needs to be online to perform actions
         if self.__is_connected:
             post_maker = PostFactory(self)
             post = post_maker.create(post_type, *args)
-            self.__posts.append(post)
-            print(post)
-            self.notify_all(f"{self.__username} has a new post")
+            if post is not None:      # If post creation was successful
+                self.__posts.append(post)
+                print(post)
+                self.notify_all(f"{self.__username} has a new post")
             return post
         else:
             # raise Exception(f"{self.__username} is offline!")
             print(f"Error: {self.__username} couldn't publish a post: {self.__username} is offline!")
-
         return None
 
     def print_notifications(self):
