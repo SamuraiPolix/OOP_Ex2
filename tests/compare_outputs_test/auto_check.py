@@ -15,7 +15,7 @@ os.chdir(current_directory)
 
 # Run the main.py file and save its output to student_output_file
 try:
-    subprocess.run(["python3", "../main.py"], stdout=open(student_output_file, "w+"), stderr=subprocess.PIPE, check=True, cwd=current_directory)
+    subprocess.run(["python3", "../../main.py"], stdout=open(student_output_file, "w+"), stderr=subprocess.PIPE, check=True, cwd=current_directory)
 except subprocess.CalledProcessError as e:
     print(f"Error running main.py: {e.stderr.decode('utf-8')}")
     exit(1)
