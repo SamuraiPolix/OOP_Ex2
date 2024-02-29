@@ -1,8 +1,5 @@
 # Singelton
-from typing import Type
-
-import UsersManager
-from User import *
+from User import User
 
 
 class SocialNetwork:
@@ -32,6 +29,7 @@ class SocialNetwork:
             self.__users.append(user)
             return user
         else:
+            print(f"Error signing up user \"{username}\": username is already taken!")
             return None
             # TODO Throw exception?
 

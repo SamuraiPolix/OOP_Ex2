@@ -1,69 +1,30 @@
-from abc import ABC, abstractmethod
-from enum import Enum
-from User import User
+# In charge of all types of 'Post' (ImagePost, TestPost, SalesPost, etc.)
+from abc import ABC
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 
 
-# Enum to set post types
-class PostTypes(str, Enum):
-    IMAGE = "Image"
-    TEXT = "Text"
-    SALE = "Sale"
-
-
-# # Implementing Singleton and Factory design patterns
-class PostFactory(ABC):
-    __instance = None
-
-    def __new__(cls, user: User):
-        # If an instance doesn't already exist, create one
-        if cls.__instance is None:
-            cls.__instance = super().__new__(cls)
-        return cls.__instance
-
-    def __init__(self, user: User):
-        self.__user = user
-
-    def create(self, post_type: str, *args):
-        post = None
-        if self.__user.is_connected():
-            if post_type == PostTypes.TEXT:
-                post = TextPost(self.__user, args[0])
-            elif post_type == PostTypes.IMAGE:
-                post = ImagePost(self.__user, args[0])
-            elif post_type == PostTypes.SALE:
-                post = SalePost(self.__user, *args)
-            else:
-                # raise Exception(f"ERROR: Couldn't create a post for {self.__user.get_username()}: \"Post type\" doesn't exist")
-                print(f"ERROR: Couldn't create a post for {self.__user.get_username()}: \"Post type\" doesn't exist")
-        else:
-            # raise Exception(f"ERROR: Couldn't create a post for {self.__user.get_username()}: {self.__user.get_username()} is offline!")
-            print(f"ERROR: Couldn't create a post for {self.__user.get_username()}: {self.__user.get_username()} is offline!")
-
-        return post
-
-
 class Post(ABC):
-    _likes: list
-    _comments: []
-    _owner: User
-
-    def __init__(self, owner: User):
+    def __init__(self, owner):
         self._likes = []
         self._comments = []
         self._owner = owner
 
-    def like(self, user: User):
+    def like(self, user):
         if user.is_connected():
-            self._likes.append(user)
-            # Notify only if someone other than the owner likes the post
-            if user.get_username() != self._owner.get_username():
-                message = f"{user.get_username()} liked your post"
-                self._owner.update(message)
-                print(f"notification to {self._owner.get_username()}: {message}")
+            if not self._likes.__contains__(user):
+                self._likes.append(user)
+                # Notify only if someone other than the owner likes the post
+                if user.get_username() != self._owner.get_username():
+                    message = f"{user.get_username()} liked your post"
+                    self._owner.update(message)
+                    print(f"notification to {self._owner.get_username()}: {message}")
+            else:
+                print(f"Error: {user.get_username()} already liked {self._owner.get_username()}'s post!")
+        else:
+            print(f"Error: {user.get_username()} couldn't like {self._owner.get_username()}'s post: {user.get_username()} is offline!")
 
-    def comment(self, user: User, text: str):
+    def comment(self, user, text):
         if user.is_connected():
             comment = Comment(user, text)
             self._comments.append(comment)
@@ -72,14 +33,20 @@ class Post(ABC):
                 message = f"{user.get_username()} commented on your post"
                 self._owner.update(message)
                 print(f"notification to {self._owner.get_username()}: {message}: {text}")
+        else:
+            print(f"Error: {user.get_username()} couldn't comment on {self._owner.get_username()}'s post: {user.get_username()} is offline!")
+
+    def display(self):
+        # Default for all post types that doesn't have a display() function.
+        # ImagePost overrides this.
+        print(f"Error: display() function is not available for a {self.__class__.__name__}!")
 
     def __str__(self):
         return self._owner.get_username()
 
 
-# TODO - remove object comment and use dict? username:comment
 class Comment:
-    def __init__(self, user: User, comment: str):
+    def __init__(self, user, comment: str):
         self._user = user
         self._comment = comment
 
@@ -93,7 +60,7 @@ class Comment:
 class TextPost(Post):
     _content: str
 
-    def __init__(self, owner: User, text: str):
+    def __init__(self, owner, text: str):
         super().__init__(owner)
         self._content = text
 
@@ -104,20 +71,25 @@ class TextPost(Post):
 class ImagePost(Post):
     _path: str
 
-    def __init__(self, owner: User, img_path: str):
+    def __init__(self, owner, img_path: str):
+        # Lets you create a post with an invalid path, but displaying won't work
         super().__init__(owner)
+        # if not os.path.isfile(img_path):
+        #     print(f"Warning: '{img_path}' File doesn't exist. (Post still created. display() won't work)\n")
         self._path = img_path
 
     def display(self):
+        # if os.path.isfile(self._path):
         print("Shows picture")
-        # img = mpimg.imread(self._path)
-        # plt.imshow(img)
-        # plt.axis('off')
-        # plt.show()
+        img = mpimg.imread(self._path)
+        plt.imshow(img)
+        plt.axis('off')
+        plt.show()
+        # else:
+        #     print(f"Error: couldn't display image '{self._path}': File doesn't exist in current directory.\n")
 
     def __str__(self):
         return f"{self._owner.get_username()} posted a picture\n"
-
 
 
 class SalePost(Post):
@@ -125,9 +97,12 @@ class SalePost(Post):
     _price: float
     _address: str
     _available: bool
+    _status: str
 
-    def __init__(self, owner: User, description: str, price: float, address: str):
+    def __init__(self, owner, description: str, price: float, address: str):
         super().__init__(owner)
+        if price < 0:
+            print("Warning: Price on sales post is invalid. (Post created anyways)\n")
         self._description = description
         self._price = price
         self._address = address
@@ -145,10 +120,13 @@ class SalePost(Post):
 
     def discount(self, discount_percent: float, password: str):
         if self._owner.is_correct_password(password):
-            self._price *= (100-discount_percent)/100
-            print(f"Discount on {self._owner.get_username()} product! the new price is: {self._price}")
+            if discount_percent < 0 or discount_percent > 100:
+                print("Error: Discount percent in invalid. (Discount not logged)\n")
+            else:
+                self._price *= (100-discount_percent)/100
+                print(f"Discount on {self._owner.get_username()} product! the new price is: {self._price}")
         else:
-            print(f"Error trying to add a discount to {self._owner.get_username()}'s Sale Post : Wrong Password")
+            print(f"Error: couldn't add a discount to {self._owner.get_username()}'s Sale Post : Wrong Password!")
 
     def __str__(self):
         return (f"{self._owner.get_username()} posted a product for sale:"

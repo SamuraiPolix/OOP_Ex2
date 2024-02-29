@@ -1,10 +1,13 @@
-from Sender import *
-from Receiver import *
-from Post import PostFactory
+from Observer import Sender, Receiver
+from PostFactory import PostFactory
 
 
 # Implementing the Observer design pattern
 class User (Sender, Receiver):
+    __username: str
+    __password: str
+    __is_connected: bool
+    __posts: list
 
     def __init__(self, username: str, password: str):
         Sender.__init__(self)
@@ -24,10 +27,13 @@ class User (Sender, Receiver):
         return password == self.__password
 
     def connect(self, password: str):
-        if self.is_correct_password(password):
-            self.__is_connected = True
+        if self.__is_connected:
+            raise Exception(f"User is already logged in!")
         else:
-            raise Exception(f"Password is incorrect!")
+            if self.is_correct_password(password):
+                self.__is_connected = True
+            else:
+                raise Exception(f"Password is incorrect!")
 
     def disconnect(self):
         self.__is_connected = False
@@ -49,7 +55,7 @@ class User (Sender, Receiver):
                 print(f"Error: {self.__username} couldn't unfollow {user.get_username()}: Already not following!")
         else:
             # raise Exception(f"{self.__username} is offline!")
-            print(f"Error: {self.__username} couldn't follow {user.get_username()}: {self.__username} is offline!")
+            print(f"Error: {self.__username} couldn't unfollow {user.get_username()}: {self.__username} is offline!")
 
     def publish_post(self, post_type: str, *args):
         if self.__is_connected:
