@@ -1,5 +1,7 @@
 from SocialNetwork import SocialNetwork
 
+
+# Used to generate some traffic in our Social Network and test the output
 def main():
     # Creating the network
     network = SocialNetwork("Twitter")
