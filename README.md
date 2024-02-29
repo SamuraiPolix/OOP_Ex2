@@ -25,7 +25,10 @@ The Observer pattern is used in the User class, to notify users of relevant acti
 The Factory pattern is used in the Post class, to create instances of different post types (TextPost, ImagePost, SalePost) based on the specific requirements of each post type.
 
 ### UML Diagram
--- ADD LATER --
+![classes](https://github.com/SamuraiPolix/OOP_Ex2/blob/master/uml_diagram/classes.png?raw=true)
+![packages](https://github.com/SamuraiPolix/OOP_Ex2/blob/master/uml_diagram/packages.png?raw=true)
+
+
 
 ## Running the Project
 Use the provided main.py file to simulate social network activities.
