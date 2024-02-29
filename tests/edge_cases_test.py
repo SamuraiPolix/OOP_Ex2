@@ -11,6 +11,11 @@ def additional_tests():
     duplicate_network = SocialNetwork("Facebook")
     print()
 
+    # Make sure only one instance of SocialNetwork is created:
+    print(network is network2)
+    print(network.__hash__(), network2.__hash__())
+    print()
+
     # Creating users
     u1 = network.sign_up("John", "pass123")
     u2 = network.sign_up("Jane", "password")
